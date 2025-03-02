@@ -1,0 +1,26 @@
+[
+  {
+    "code": "A001",
+    "name": "Chair",
+    "room": "B01",
+    "checked": false
+  },
+  {
+    "code": "A002",
+    "name": "Table",
+    "room": "B01",
+    "checked": false
+  },
+  {
+    "code": "A003",
+    "name": "Lamp",
+    "room": "B02",
+    "checked": false
+  },
+  {
+    "code": "A004",
+    "name": "Sofa",
+    "room": "B03",
+    "checked": false
+  }
+]
