@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 
-// Ensure these environment variables are set in .env.local
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
@@ -13,6 +12,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    console.log('Fetching data from Supabase...');
+
     const { data, error } = await supabase.from('inventory').select('*');
 
     if (error) {
@@ -20,6 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       throw error;
     }
 
+    console.log('Data fetched successfully:', data);
     res.status(200).json(data);
   } catch (error) {
     console.error('Error loading data:', error);
