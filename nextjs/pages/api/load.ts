@@ -1,28 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+const filePath = path.join(process.cwd(), 'data', 'inventory.json');
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Supabase URL and Key are required');
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    console.log('Fetching data from Supabase...');
-
-    const { data, error } = await supabase.from('inventory').select('*');
-
-    if (error) {
-      console.error('Supabase error:', error);
-      throw error;
-    }
-
-    console.log('Data fetched successfully:', data);
-    res.status(200).json(data);
+    const data = fs.readFileSync(filePath, 'utf8');
+    res.status(200).json(JSON.parse(data));
   } catch (error) {
     console.error('Error loading data:', error);
     res.status(500).json({ message: 'Failed to load data' });

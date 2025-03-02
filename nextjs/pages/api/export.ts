@@ -1,35 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+const filePath = path.join(process.cwd(), 'data', 'inventory.json');
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Supabase URL and Key are required');
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
       const newData = req.body;
 
-      // Delete all existing rows
-      const { error: deleteError } = await supabase.from('inventory').delete().neq('code', '');
-
-      if (deleteError) {
-        console.error('Supabase delete error:', deleteError);
-        throw deleteError;
-      }
-
-      // Insert new data
-      const { error: insertError } = await supabase.from('inventory').insert(newData);
-
-      if (insertError) {
-        console.error('Supabase insert error:', insertError);
-        throw insertError;
-      }
+      // Write to a temporary file (not recommended for production)
+      fs.writeFileSync(filePath, JSON.stringify(newData, null, 2));
 
       res.status(200).json({ message: 'Data exported successfully!' });
     } catch (error) {
@@ -37,7 +18,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(500).json({ message: 'Failed to export data' });
     }
   } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).json({ message: `Method ${req.method} not allowed` });
+    res.status(405).json({ message: 'Method not allowed' });
   }
 }
