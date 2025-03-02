@@ -2,7 +2,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-// Path to the JSON file
 const filePath = path.join(process.cwd(), 'data', 'inventory.json');
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -10,7 +9,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       const newData = req.body;
 
-      // Save the new data to the JSON file
+      // Write to a temporary file (not recommended for production)
       fs.writeFileSync(filePath, JSON.stringify(newData, null, 2));
 
       res.status(200).json({ message: 'Data exported successfully!' });
