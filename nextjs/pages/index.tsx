@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; // Add this import
 
 // Define the type for an inventory item
 interface InventoryItem {
@@ -9,7 +9,6 @@ interface InventoryItem {
 }
 
 export default function Home() {
-  // Explicitly type the state as an array of InventoryItem
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

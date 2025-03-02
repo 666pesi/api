@@ -22,5 +22,11 @@
     "name": "Sofa",
     "room": "B03",
     "checked": false
+  },
+  {
+    "code": "A005",
+    "name": "Pes",
+    "room": "B02",
+    "checked": false
   }
 ]
