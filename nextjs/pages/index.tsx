@@ -11,6 +11,7 @@ export default function Home() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch data from the server
   useEffect(() => {
     fetch('/api/load')
       .then((response) => response.json())
@@ -24,6 +25,7 @@ export default function Home() {
       });
   }, []);
 
+  // Handle form submission
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -47,12 +49,14 @@ export default function Home() {
     }
   };
 
+  // Handle input changes
   const handleChange = (index: number, field: keyof InventoryItem, value: string | boolean) => {
     const updatedData = [...inventoryData];
     updatedData[index][field] = value as never;
     setInventoryData(updatedData);
   };
 
+  // Add a new item
   const addNewItem = () => {
     const newItem: InventoryItem = {
       code: `A${String(inventoryData.length + 1).padStart(3, '0')}`,
@@ -63,6 +67,7 @@ export default function Home() {
     setInventoryData([...inventoryData, newItem]);
   };
 
+  // Remove an item
   const removeItem = (index: number) => {
     const updatedData = inventoryData.filter((_, i) => i !== index);
     setInventoryData(updatedData);
