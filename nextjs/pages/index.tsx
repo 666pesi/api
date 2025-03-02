@@ -1,14 +1,23 @@
 import { useState, useEffect } from 'react';
 
+// Define the type for an inventory item
+interface InventoryItem {
+  code: string;
+  name: string;
+  room: string;
+  checked: boolean;
+}
+
 export default function Home() {
-  const [inventoryData, setInventoryData] = useState([]);
+  // Explicitly type the state as an array of InventoryItem
+  const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch data from the server
   useEffect(() => {
     fetch('/api/load')
       .then((response) => response.json())
-      .then((data) => {
+      .then((data: InventoryItem[]) => {
         setInventoryData(data);
         setIsLoading(false);
       })
@@ -19,7 +28,7 @@ export default function Home() {
   }, []);
 
   // Handle form submission
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
@@ -43,9 +52,9 @@ export default function Home() {
   };
 
   // Handle input changes
-  const handleChange = (index, field, value) => {
+  const handleChange = (index: number, field: keyof InventoryItem, value: string | boolean) => {
     const updatedData = [...inventoryData];
-    updatedData[index][field] = value;
+    updatedData[index][field] = value as never; // Use type assertion to avoid type errors
     setInventoryData(updatedData);
   };
 
