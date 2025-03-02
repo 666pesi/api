@@ -58,6 +58,23 @@ export default function Home() {
     setInventoryData(updatedData);
   };
 
+  // Add a new item
+  const addNewItem = () => {
+    const newItem: InventoryItem = {
+      code: `A${String(inventoryData.length + 1).padStart(3, '0')}`, // Generate a new code (e.g., A001, A002, etc.)
+      name: '',
+      room: '',
+      checked: false,
+    };
+    setInventoryData([...inventoryData, newItem]);
+  };
+
+  // Remove an item
+  const removeItem = (index: number) => {
+    const updatedData = inventoryData.filter((_, i) => i !== index);
+    setInventoryData(updatedData);
+  };
+
   if (isLoading) {
     return <p>Loading...</p>;
   }
@@ -73,6 +90,7 @@ export default function Home() {
               <th>Name</th>
               <th>Room</th>
               <th>Checked</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -106,11 +124,21 @@ export default function Home() {
                     onChange={(e) => handleChange(index, 'checked', e.target.checked)}
                   />
                 </td>
+                <td>
+                  <button type="button" onClick={() => removeItem(index)}>
+                    Remove
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <button type="submit">Save Changes</button>
+        <div style={{ marginTop: '16px' }}>
+          <button type="button" onClick={addNewItem} style={{ marginRight: '8px' }}>
+            Add New Item
+          </button>
+          <button type="submit">Save Changes</button>
+        </div>
       </form>
     </main>
   );
