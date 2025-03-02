@@ -1,16 +1,28 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import fs from 'fs';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 
-const filePath = path.join(process.cwd(), 'data', 'inventory.json');
+const supabaseUrl = process.env.SUPABASE_URL!;
+const supabaseKey = process.env.SUPABASE_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
       const newData = req.body;
 
-      // Write to a temporary file (not recommended for production)
-      fs.writeFileSync(filePath, JSON.stringify(newData, null, 2));
+      // Delete all existing rows
+      const { error: deleteError } = await supabase.from('inventory').delete().neq('code', '');
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      // Insert new data
+      const { error: insertError } = await supabase.from('inventory').insert(newData);
+
+      if (insertError) {
+        throw insertError;
+      }
 
       res.status(200).json({ message: 'Data exported successfully!' });
     } catch (error) {
