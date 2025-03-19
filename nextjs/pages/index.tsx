@@ -10,23 +10,16 @@ interface InventoryItem {
 export default function Home() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/load')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to load data');
-        }
-        return response.json();
-      })
+      .then((response) => response.json())
       .then((data: InventoryItem[]) => {
         setInventoryData(data);
         setIsLoading(false);
       })
       .catch((error) => {
         console.error('Error loading data:', error);
-        setError(error.message);
         setIsLoading(false);
       });
   }, []);
@@ -43,11 +36,11 @@ export default function Home() {
         body: JSON.stringify(inventoryData),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to save data');
+      if (response.ok) {
+        alert('Data saved successfully!');
+      } else {
+        alert('Failed to save data.');
       }
-
-      alert('Data saved successfully!');
     } catch (error) {
       console.error('Error saving data:', error);
       alert('Failed to save data.');
@@ -79,12 +72,8 @@ export default function Home() {
     return <p>Loading...</p>;
   }
 
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
-
   return (
-    <main className="container">
+    <main>
       <h1>Inventory Editor</h1>
       <form onSubmit={handleSubmit}>
         <table>
@@ -137,8 +126,8 @@ export default function Home() {
             ))}
           </tbody>
         </table>
-        <div className="actions">
-          <button type="button" onClick={addNewItem}>
+        <div style={{ marginTop: '16px' }}>
+          <button type="button" onClick={addNewItem} style={{ marginRight: '8px' }}>
             Add New Item
           </button>
           <button type="submit">Save Changes</button>

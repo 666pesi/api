@@ -4,12 +4,12 @@ import path from 'path';
 
 const filePath = path.join(process.cwd(), 'data', 'inventory.json');
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const data = fs.readFileSync(filePath, 'utf8');
     res.status(200).json(JSON.parse(data));
   } catch (error) {
     console.error('Error loading data:', error);
-    res.status(500).json({ message: 'Failed to load data.' });
+    res.status(500).json({ message: 'Failed to load data' });
   }
 }
