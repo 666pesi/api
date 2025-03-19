@@ -4,13 +4,18 @@ import path from 'path';
 
 const filePath = path.join(process.cwd(), 'data', 'inventory.json');
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
       const newData = req.body;
 
+      // Basic validation
+      if (!Array.isArray(newData)) {
+        return res.status(400).json({ message: 'Invalid data format' });
+      }
+
       // Write to a temporary file (not recommended for production)
-      fs.writeFileSync(filePath, JSON.stringify(newData, null, 2));
+      await fs.promises.writeFile(filePath, JSON.stringify(newData, null, 2));
 
       res.status(200).json({ message: 'Data exported successfully!' });
     } catch (error) {

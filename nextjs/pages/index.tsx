@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import styles from '../styles/Home.module.css';
 
 interface InventoryItem {
   code: string;
@@ -10,16 +11,23 @@ interface InventoryItem {
 export default function Home() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/load')
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to load data');
+        }
+        return response.json();
+      })
       .then((data: InventoryItem[]) => {
         setInventoryData(data);
         setIsLoading(false);
       })
       .catch((error) => {
         console.error('Error loading data:', error);
+        setError(error.message);
         setIsLoading(false);
       });
   }, []);
@@ -36,11 +44,11 @@ export default function Home() {
         body: JSON.stringify(inventoryData),
       });
 
-      if (response.ok) {
-        alert('Data saved successfully!');
-      } else {
-        alert('Failed to save data.');
+      if (!response.ok) {
+        throw new Error('Failed to save data');
       }
+
+      alert('Data saved successfully!');
     } catch (error) {
       console.error('Error saving data:', error);
       alert('Failed to save data.');
@@ -72,8 +80,12 @@ export default function Home() {
     return <p>Loading...</p>;
   }
 
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
+
   return (
-    <main>
+    <main className={styles.container}>
       <h1>Inventory Editor</h1>
       <form onSubmit={handleSubmit}>
         <table>
