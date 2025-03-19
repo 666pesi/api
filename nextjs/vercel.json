@@ -1,0 +1,10 @@
+{
+    "functions": {
+      "api/export.ts": {
+        "includeFiles": "data/inventory.json"
+      },
+      "api/load.ts": {
+        "includeFiles": "data/inventory.json"
+      }
+    }
+  }
