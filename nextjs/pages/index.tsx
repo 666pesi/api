@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import styles from '../styles/Home.module.css';
 
 interface InventoryItem {
   code: string;
@@ -85,7 +84,7 @@ export default function Home() {
   }
 
   return (
-    <main className={styles.container}>
+    <main className="container">
       <h1>Inventory Editor</h1>
       <form onSubmit={handleSubmit}>
         <table>
@@ -138,8 +137,8 @@ export default function Home() {
             ))}
           </tbody>
         </table>
-        <div style={{ marginTop: '16px' }}>
-          <button type="button" onClick={addNewItem} style={{ marginRight: '8px' }}>
+        <div className="actions">
+          <button type="button" onClick={addNewItem}>
             Add New Item
           </button>
           <button type="submit">Save Changes</button>
