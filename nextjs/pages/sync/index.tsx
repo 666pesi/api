@@ -1,17 +1,9 @@
-// pages/sync/index.tsx
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-interface InventoryItem {
-  code: string;
-  name: string;
-  room: string;
-  checked: boolean;
-}
-
 interface ExportData {
   id: string;
-  data: InventoryItem[];
+  data: any;
   receivedAt: string;
 }
 
@@ -40,6 +32,7 @@ export default function Sync() {
 
       if (response.ok) {
         alert('Data synchronized successfully!');
+        setExports([]); // Clear the list after sync
       } else {
         alert('Failed to synchronize data.');
       }

@@ -1,4 +1,3 @@
-// pages/api/sync.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
@@ -22,7 +21,6 @@ interface ExportData {
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      // Read existing inventory and exports
       const inventory: InventoryItem[] = fs.existsSync(inventoryFilePath)
         ? JSON.parse(fs.readFileSync(inventoryFilePath, 'utf8'))
         : [];
@@ -30,7 +28,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
         : [];
 
-      // Merge all exports into inventory
       exports.forEach((exp) => {
         exp.data.forEach((item) => {
           const existingItemIndex = inventory.findIndex((i) => i.code === item.code);
@@ -42,10 +39,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         });
       });
 
-      // Save updated inventory
       fs.writeFileSync(inventoryFilePath, JSON.stringify(inventory, null, 2));
-
-      // Clear exports
       fs.writeFileSync(exportsFilePath, JSON.stringify([], null, 2));
 
       res.status(200).json({ message: 'Data synchronized successfully!' });
