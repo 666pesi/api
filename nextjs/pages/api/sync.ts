@@ -5,11 +5,18 @@ import path from 'path';
 
 const filePath = path.join(process.cwd(), 'data', 'inventory.json');
 
+interface InventoryItem {
+  code: string;
+  name: string;
+  room: string;
+  checked: boolean;
+}
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const incomingData = req.body;
-      const existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      const incomingData: InventoryItem[] = req.body;
+      const existingData: InventoryItem[] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
       // Merge incoming data with existing data
       const mergedData = mergeData(existingData, incomingData);
@@ -27,7 +34,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-function mergeData(existingData: any[], incomingData: any[]): any[] {
+function mergeData(existingData: InventoryItem[], incomingData: InventoryItem[]): InventoryItem[] {
   const mergedData = [...existingData];
 
   incomingData.forEach((incomingItem) => {
