@@ -4,13 +4,6 @@ import path from 'path';
 
 const inventoryFilePath = path.join(process.cwd(), 'data', 'inventory.json');
 
-interface InventoryItem {
-  code: string;
-  name: string;
-  room: string;
-  checked: boolean;
-}
-
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const data = fs.readFileSync(inventoryFilePath, 'utf8');
