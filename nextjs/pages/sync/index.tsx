@@ -33,7 +33,7 @@ export default function Sync() {
 
   const handleSync = async () => {
     try {
-      const response = await fetch('/api/sync', {
+      const response = await fetch('/api/sync-now', {
         method: 'POST',
       });
 
