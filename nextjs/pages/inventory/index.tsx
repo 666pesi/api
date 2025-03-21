@@ -1,4 +1,3 @@
-// pages/inventory/index.tsx
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
@@ -28,7 +27,6 @@ export default function Inventory() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     try {
       const response = await fetch('/api/export', {
         method: 'POST',
@@ -37,7 +35,6 @@ export default function Inventory() {
         },
         body: JSON.stringify(inventoryData),
       });
-
       if (response.ok) {
         alert('Data saved successfully!');
       } else {

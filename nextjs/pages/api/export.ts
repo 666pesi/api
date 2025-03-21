@@ -1,4 +1,3 @@
-// pages/api/export.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
@@ -16,10 +15,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
       const newData: InventoryItem[] = req.body;
-
-      // Write the new data to inventory.json
       fs.writeFileSync(filePath, JSON.stringify(newData, null, 2));
-
       res.status(200).json({ message: 'Data exported successfully!' });
     } catch (error) {
       console.error('Error exporting data:', error);
