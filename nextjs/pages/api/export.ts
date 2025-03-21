@@ -1,16 +1,30 @@
+// pages/api/export.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-const filePath = path.join(process.cwd(), 'data', 'inventory.json');
+const exportsFilePath = path.join(process.cwd(), 'data', 'exports.json');
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
       const newData = req.body;
 
-      // Write to a temporary file (not recommended for production)
-      fs.writeFileSync(filePath, JSON.stringify(newData, null, 2));
+      // Read existing exports
+      const existingExports = fs.existsSync(exportsFilePath)
+        ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
+        : [];
+
+      // Add new export
+      const newExport = {
+        id: `export-${Date.now()}`,
+        data: newData,
+        receivedAt: new Date().toISOString(),
+      };
+      existingExports.push(newExport);
+
+      // Save updated exports
+      fs.writeFileSync(exportsFilePath, JSON.stringify(existingExports, null, 2));
 
       res.status(200).json({ message: 'Data exported successfully!' });
     } catch (error) {

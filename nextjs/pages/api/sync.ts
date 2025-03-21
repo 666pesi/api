@@ -3,26 +3,37 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-const filePath = path.join(process.cwd(), 'data', 'inventory.json');
-
-interface InventoryItem {
-  code: string;
-  name: string;
-  room: string;
-  checked: boolean;
-}
+const inventoryFilePath = path.join(process.cwd(), 'data', 'inventory.json');
+const exportsFilePath = path.join(process.cwd(), 'data', 'exports.json');
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const incomingData: InventoryItem[] = req.body;
-      const existingData: InventoryItem[] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      // Read existing inventory and exports
+      const inventory = fs.existsSync(inventoryFilePath)
+        ? JSON.parse(fs.readFileSync(inventoryFilePath, 'utf8'))
+        : [];
+      const exports = fs.existsSync(exportsFilePath)
+        ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
+        : [];
 
-      // Merge incoming data with existing data
-      const mergedData = mergeData(existingData, incomingData);
+      // Merge all exports into inventory
+      exports.forEach((exp: any) => {
+        exp.data.forEach((item: any) => {
+          const existingItemIndex = inventory.findIndex((i: any) => i.code === item.code);
+          if (existingItemIndex !== -1) {
+            inventory[existingItemIndex] = { ...inventory[existingItemIndex], ...item };
+          } else {
+            inventory.push(item);
+          }
+        });
+      });
 
-      // Write the merged data back to the file
-      fs.writeFileSync(filePath, JSON.stringify(mergedData, null, 2));
+      // Save updated inventory
+      fs.writeFileSync(inventoryFilePath, JSON.stringify(inventory, null, 2));
+
+      // Clear exports
+      fs.writeFileSync(exportsFilePath, JSON.stringify([], null, 2));
 
       res.status(200).json({ message: 'Data synchronized successfully!' });
     } catch (error) {
@@ -32,22 +43,4 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   } else {
     res.status(405).json({ message: 'Method not allowed' });
   }
-}
-
-function mergeData(existingData: InventoryItem[], incomingData: InventoryItem[]): InventoryItem[] {
-  const mergedData = [...existingData];
-
-  incomingData.forEach((incomingItem) => {
-    const existingItemIndex = mergedData.findIndex((item) => item.code === incomingItem.code);
-
-    if (existingItemIndex !== -1) {
-      // Update existing item
-      mergedData[existingItemIndex] = { ...mergedData[existingItemIndex], ...incomingItem };
-    } else {
-      // Add new item
-      mergedData.push(incomingItem);
-    }
-  });
-
-  return mergedData;
 }
