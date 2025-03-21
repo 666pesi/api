@@ -12,17 +12,22 @@ export default function Inventory() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Function to fetch inventory data
+  const fetchInventoryData = async () => {
+    try {
+      const response = await fetch('/api/load');
+      const data: InventoryItem[] = await response.json();
+      setInventoryData(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch data on component mount
   useEffect(() => {
-    fetch('/api/load')
-      .then((response) => response.json())
-      .then((data: InventoryItem[]) => {
-        setInventoryData(data);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error loading data:', error);
-        setIsLoading(false);
-      });
+    fetchInventoryData();
   }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -69,6 +74,26 @@ export default function Inventory() {
     setInventoryData(updatedData);
   };
 
+  // Function to handle sync
+  const handleSync = async () => {
+    try {
+      const response = await fetch('/api/sync-now', {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        alert('Data synchronized successfully!');
+        // Refetch inventory data after sync
+        fetchInventoryData();
+      } else {
+        alert('Failed to synchronize data.');
+      }
+    } catch (error) {
+      console.error('Error synchronizing data:', error);
+      alert('Failed to synchronize data.');
+    }
+  };
+
   if (isLoading) {
     return <p>Loading...</p>;
   }
@@ -77,6 +102,9 @@ export default function Inventory() {
     <main>
       <h1>Inventory Editor</h1>
       <Link href="/">Back to Main Menu</Link>
+      <button onClick={handleSync} style={{ marginBottom: '16px' }}>
+        Sync Now
+      </button>
       <form onSubmit={handleSubmit}>
         <table>
           <thead>
