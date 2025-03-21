@@ -4,16 +4,23 @@ import path from 'path';
 
 const exportsFilePath = path.join(process.cwd(), 'data', 'exports.json');
 
+interface InventoryItem {
+  code: string;
+  name: string;
+  room: string;
+  checked: boolean;
+}
+
 interface ExportData {
   id: string;
-  data: any;
+  data: InventoryItem[];
   receivedAt: string;
 }
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
-      const exports = fs.existsSync(exportsFilePath)
+      const exports: ExportData[] = fs.existsSync(exportsFilePath)
         ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
         : [];
       res.status(200).json(exports);
