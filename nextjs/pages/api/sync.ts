@@ -6,21 +6,34 @@ import path from 'path';
 const inventoryFilePath = path.join(process.cwd(), 'data', 'inventory.json');
 const exportsFilePath = path.join(process.cwd(), 'data', 'exports.json');
 
+interface InventoryItem {
+  code: string;
+  name: string;
+  room: string;
+  checked: boolean;
+}
+
+interface ExportData {
+  id: string;
+  data: InventoryItem[];
+  receivedAt: string;
+}
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
       // Read existing inventory and exports
-      const inventory = fs.existsSync(inventoryFilePath)
+      const inventory: InventoryItem[] = fs.existsSync(inventoryFilePath)
         ? JSON.parse(fs.readFileSync(inventoryFilePath, 'utf8'))
         : [];
-      const exports = fs.existsSync(exportsFilePath)
+      const exports: ExportData[] = fs.existsSync(exportsFilePath)
         ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
         : [];
 
       // Merge all exports into inventory
-      exports.forEach((exp: any) => {
-        exp.data.forEach((item: any) => {
-          const existingItemIndex = inventory.findIndex((i: any) => i.code === item.code);
+      exports.forEach((exp) => {
+        exp.data.forEach((item) => {
+          const existingItemIndex = inventory.findIndex((i) => i.code === item.code);
           if (existingItemIndex !== -1) {
             inventory[existingItemIndex] = { ...inventory[existingItemIndex], ...item };
           } else {

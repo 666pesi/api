@@ -5,18 +5,31 @@ import path from 'path';
 
 const exportsFilePath = path.join(process.cwd(), 'data', 'exports.json');
 
+interface InventoryItem {
+  code: string;
+  name: string;
+  room: string;
+  checked: boolean;
+}
+
+interface ExportData {
+  id: string;
+  data: InventoryItem[];
+  receivedAt: string;
+}
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const newData = req.body;
+      const newData: InventoryItem[] = req.body;
 
       // Read existing exports
-      const existingExports = fs.existsSync(exportsFilePath)
+      const existingExports: ExportData[] = fs.existsSync(exportsFilePath)
         ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
         : [];
 
       // Add new export
-      const newExport = {
+      const newExport: ExportData = {
         id: `export-${Date.now()}`,
         data: newData,
         receivedAt: new Date().toISOString(),

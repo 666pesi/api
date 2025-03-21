@@ -2,9 +2,16 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+interface InventoryItem {
+  code: string;
+  name: string;
+  room: string;
+  checked: boolean;
+}
+
 interface ExportData {
   id: string;
-  data: any; // Replace with the actual structure of your export data
+  data: InventoryItem[];
   receivedAt: string;
 }
 
