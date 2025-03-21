@@ -2,7 +2,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-const inventoryFilePath = path.join(process.cwd(), 'data', 'inventory.json');
 const exportsFilePath = path.join(process.cwd(), 'data', 'exports.json');
 
 interface InventoryItem {
@@ -21,31 +20,28 @@ interface ExportData {
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const inventory: InventoryItem[] = fs.existsSync(inventoryFilePath)
-        ? JSON.parse(fs.readFileSync(inventoryFilePath, 'utf8'))
-        : [];
-      const exports: ExportData[] = fs.existsSync(exportsFilePath)
+      const newData: InventoryItem[] = req.body;
+
+      // Read existing exports
+      const existingExports: ExportData[] = fs.existsSync(exportsFilePath)
         ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
         : [];
 
-      exports.forEach((exp) => {
-        exp.data.forEach((item) => {
-          const existingItemIndex = inventory.findIndex((i) => i.code === item.code);
-          if (existingItemIndex !== -1) {
-            inventory[existingItemIndex] = { ...inventory[existingItemIndex], ...item };
-          } else {
-            inventory.push(item);
-          }
-        });
-      });
+      // Add new export
+      const newExport: ExportData = {
+        id: `export-${Date.now()}`,
+        data: newData,
+        receivedAt: new Date().toISOString(),
+      };
+      existingExports.push(newExport);
 
-      fs.writeFileSync(inventoryFilePath, JSON.stringify(inventory, null, 2));
-      fs.writeFileSync(exportsFilePath, JSON.stringify([], null, 2));
+      // Save updated exports
+      fs.writeFileSync(exportsFilePath, JSON.stringify(existingExports, null, 2));
 
-      res.status(200).json({ message: 'Data synchronized successfully!' });
+      res.status(200).json({ message: 'Data received and preserved for sync!' });
     } catch (error) {
-      console.error('Error synchronizing data:', error);
-      res.status(500).json({ message: 'Failed to synchronize data' });
+      console.error('Error receiving data:', error);
+      res.status(500).json({ message: 'Failed to receive data' });
     }
   } else {
     res.status(405).json({ message: 'Method not allowed' });
