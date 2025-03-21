@@ -16,6 +16,9 @@ export default function Inventory() {
   const fetchInventoryData = async () => {
     try {
       const response = await fetch('/api/load');
+      if (!response.ok) {
+        throw new Error('Failed to load data');
+      }
       const data: InventoryItem[] = await response.json();
       setInventoryData(data);
       setIsLoading(false);
@@ -84,7 +87,7 @@ export default function Inventory() {
       if (response.ok) {
         alert('Data synchronized successfully!');
         // Refetch inventory data after sync
-        fetchInventoryData();
+        await fetchInventoryData(); // Ensure this is awaited
       } else {
         alert('Failed to synchronize data.');
       }
