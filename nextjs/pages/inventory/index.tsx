@@ -39,7 +39,7 @@ export default function Inventory() {
       });
 
       if (response.ok) {
-        alert('Data exported successfully!');
+        alert('Data saved successfully!');
       } else {
         alert('Failed to save data.');
       }

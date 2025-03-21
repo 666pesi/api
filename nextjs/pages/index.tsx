@@ -10,9 +10,6 @@ export default function Home() {
           <li>
             <Link href="/inventory">Go to Inventory</Link>
           </li>
-          <li>
-            <Link href="/sync">Go to Sync</Link>
-          </li>
         </ul>
       </nav>
     </main>

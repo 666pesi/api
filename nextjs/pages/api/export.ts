@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-const exportsFilePath = path.join(process.cwd(), 'data', 'exports.json');
+const filePath = path.join(process.cwd(), 'data', 'inventory.json');
 
 interface InventoryItem {
   code: string;
@@ -12,32 +12,13 @@ interface InventoryItem {
   checked: boolean;
 }
 
-interface ExportData {
-  id: string;
-  data: InventoryItem[];
-  receivedAt: string;
-}
-
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
       const newData: InventoryItem[] = req.body;
 
-      // Read existing exports
-      const existingExports: ExportData[] = fs.existsSync(exportsFilePath)
-        ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
-        : [];
-
-      // Add new export
-      const newExport: ExportData = {
-        id: `export-${Date.now()}`,
-        data: newData,
-        receivedAt: new Date().toISOString(),
-      };
-      existingExports.push(newExport);
-
-      // Save updated exports
-      fs.writeFileSync(exportsFilePath, JSON.stringify(existingExports, null, 2));
+      // Write the new data to inventory.json
+      fs.writeFileSync(filePath, JSON.stringify(newData, null, 2));
 
       res.status(200).json({ message: 'Data exported successfully!' });
     } catch (error) {
