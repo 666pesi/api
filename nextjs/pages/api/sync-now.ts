@@ -35,16 +35,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           const existingItemIndex = inventory.findIndex((i) => i.code === item.code);
 
           if (existingItemIndex !== -1) {
-            // If the item exists, update it only if the room matches
-            const existingItem = inventory[existingItemIndex];
-            if (existingItem.room === item.room) {
-              // Update the item's room and checked status
-              inventory[existingItemIndex] = {
-                ...existingItem,
-                room: item.room,
-                checked: item.checked,
-              };
-            }
+            // If the item exists, update it
+            inventory[existingItemIndex] = {
+              ...inventory[existingItemIndex],
+              ...item, // Overwrite with the new data
+            };
           } else {
             // If the item doesn't exist, add it to the inventory
             inventory.push(item);
