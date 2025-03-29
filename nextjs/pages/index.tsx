@@ -3,14 +3,20 @@ import Link from 'next/link';
 export default function Home() {
   return (
     <main>
-      <h1>Main Menu</h1>
+      <h1>Inventory Management System</h1>
       <nav>
         <ul>
           <li>
-            <Link href="/inventory">Go to Inventory</Link>
+            <Link href="/inventory">Inventory Management</Link>
           </li>
           <li>
-            <Link href="/sync">Go to Sync</Link>
+            <Link href="/sync">Sync Management</Link>
+          </li>
+          <li>
+            <Link href="/users">User Management</Link>
+          </li>
+          <li>
+            <Link href="/rooms">Room Management</Link>
           </li>
         </ul>
       </nav>
