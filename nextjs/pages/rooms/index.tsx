@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import styles from './Rooms.module.css';
 
 interface Room {
   name: string;
@@ -95,41 +94,41 @@ export default function Rooms() {
     setDropdownOpen(dropdownOpen === roomName ? null : roomName);
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <p className="p-4">Loading...</p>;
 
   return (
-    <main className={styles.container}>
-      <h1>Room Management</h1>
-      <Link href="/" className={styles.backLink}>
+    <main className="p-4 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Room Management</h1>
+      <Link href="/" className="text-blue-500 hover:underline mb-6 inline-block">
         ← Back to Main Menu
       </Link>
       
-      <h2>Room Assignments</h2>
-      <table className={styles.table}>
+      <h2 className="text-xl font-semibold mb-4">Room Assignments</h2>
+      <table className="w-full border-collapse">
         <thead>
-          <tr>
-            <th>Room</th>
-            <th>Assigned User</th>
-            <th>Actions</th>
+          <tr className="bg-gray-100">
+            <th className="p-3 text-left border-b">Room</th>
+            <th className="p-3 text-left border-b">Assigned User</th>
+            <th className="p-3 text-left border-b">Actions</th>
           </tr>
         </thead>
         <tbody>
           {rooms.map((room) => (
-            <tr key={room.name}>
-              <td>{room.name}</td>
-              <td className={styles.dropdownCell}>
+            <tr key={room.name} className="border-b">
+              <td className="p-3">{room.name}</td>
+              <td className="p-3 relative">
                 <div 
-                  className={styles.dropdownTrigger}
+                  className="px-3 py-2 border rounded cursor-pointer inline-block min-w-[150px] bg-gray-50 hover:bg-gray-100"
                   onClick={() => toggleDropdown(room.name)}
                 >
                   {room.assignedUser || 'Select user'}
                   {dropdownOpen === room.name && (
-                    <div className={styles.dropdownMenu}>
+                    <div className="absolute top-full left-0 z-10 bg-white border rounded shadow-md w-full mt-1">
                       {users.map((user) => (
                         <div 
                           key={user.username}
-                          className={`${styles.dropdownItem} ${
-                            room.assignedUser === user.username ? styles.selectedItem : ''
+                          className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
+                            room.assignedUser === user.username ? 'bg-blue-50' : ''
                           }`}
                           onClick={() => handleUserAssignment(room.name, user.username)}
                         >
@@ -137,7 +136,7 @@ export default function Rooms() {
                         </div>
                       ))}
                       <div 
-                        className={styles.clearAssignment}
+                        className="px-3 py-2 cursor-pointer text-gray-500 border-t hover:bg-gray-100"
                         onClick={() => handleUserAssignment(room.name, '')}
                       >
                         Clear assignment
@@ -146,10 +145,10 @@ export default function Rooms() {
                   )}
                 </div>
               </td>
-              <td>
+              <td className="p-3">
                 <button 
                   onClick={() => handleDeleteRoom(room.name)}
-                  className={styles.deleteButton}
+                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                 >
                   Delete
                 </button>
