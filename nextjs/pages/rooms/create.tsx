@@ -14,28 +14,38 @@ export default function CreateRoom() {
   useEffect(() => {
     fetch('/api/rooms')
       .then(res => res.json())
-      .then(data => setRooms(data));
+      .then(data => setRooms(data))
+      .catch(err => console.error('Error loading rooms:', err));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch('/api/rooms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, name }),
-    });
-    if (response.ok) {
-      const updatedRooms = await fetch('/api/rooms').then(res => res.json());
-      setRooms(updatedRooms);
-      setCode('');
-      setName('');
+    try {
+      const response = await fetch('/api/rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, name }),
+      });
+      
+      if (response.ok) {
+        const updatedRooms = await fetch('/api/rooms').then(res => res.json());
+        setRooms(updatedRooms);
+        setCode('');
+        setName('');
+      }
+    } catch (error) {
+      console.error('Error creating room:', error);
     }
   };
 
   const handleDelete = async (code: string) => {
     if (confirm(`Delete room ${code}?`)) {
-      await fetch(`/api/rooms?code=${code}`, { method: 'DELETE' });
-      setRooms(rooms.filter(room => room.code !== code));
+      try {
+        await fetch(`/api/rooms?code=${code}`, { method: 'DELETE' });
+        setRooms(rooms.filter(room => room.code !== code));
+      } catch (error) {
+        console.error('Error deleting room:', error);
+      }
     }
   };
 

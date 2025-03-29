@@ -20,26 +20,36 @@ export default function Inventory() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [inventoryRes, roomsRes] = await Promise.all([
-        fetch('/api/load'),
-        fetch('/api/rooms')
-      ]);
-      setInventoryData(await inventoryRes.json());
-      setRooms(await roomsRes.json());
-      setIsLoading(false);
+      try {
+        const [inventoryRes, roomsRes] = await Promise.all([
+          fetch('/api/load'),
+          fetch('/api/rooms')
+        ]);
+        setInventoryData(await inventoryRes.json());
+        setRooms(await roomsRes.json());
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const response = await fetch('/api/export', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(inventoryData),
-    });
-    if (response.ok) {
-      alert('Data saved successfully!');
+    try {
+      const response = await fetch('/api/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inventoryData),
+      });
+      if (response.ok) {
+        alert('Data saved successfully!');
+      }
+    } catch (error) {
+      console.error('Error saving data:', error);
+      alert('Failed to save data');
     }
   };
 
@@ -119,4 +129,22 @@ export default function Inventory() {
                     onChange={(e) => handleChange(index, 'checked', e.target.checked)}
                   />
                 </td>
-                <td
+                <td>
+                  <button type="button" onClick={() => removeItem(index)}>
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div>
+          <button type="button" onClick={addNewItem}>
+            Add New Item
+          </button>
+          <button type="submit">Save Changes</button>
+        </div>
+      </form>
+    </main>
+  );
+}

@@ -14,28 +14,38 @@ export default function CreateUser() {
   useEffect(() => {
     fetch('/api/users')
       .then(res => res.json())
-      .then(data => setUsers(data));
+      .then(data => setUsers(data))
+      .catch(err => console.error('Error loading users:', err));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch('/api/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-    if (response.ok) {
-      const updatedUsers = await fetch('/api/users').then(res => res.json());
-      setUsers(updatedUsers);
-      setUsername('');
-      setPassword('');
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      
+      if (response.ok) {
+        const updatedUsers = await fetch('/api/users').then(res => res.json());
+        setUsers(updatedUsers);
+        setUsername('');
+        setPassword('');
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
     }
   };
 
   const handleDelete = async (username: string) => {
     if (confirm(`Delete user ${username}?`)) {
-      await fetch(`/api/users?username=${username}`, { method: 'DELETE' });
-      setUsers(users.filter(user => user.username !== username));
+      try {
+        await fetch(`/api/users?username=${username}`, { method: 'DELETE' });
+        setUsers(users.filter(user => user.username !== username));
+      } catch (error) {
+        console.error('Error deleting user:', error);
+      }
     }
   };
 

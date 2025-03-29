@@ -10,15 +10,13 @@ interface User {
 }
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
-    try {
+  try {
+    if (req.method === 'GET') {
       const users: User[] = JSON.parse(fs.readFileSync(usersFilePath, 'utf8'));
-      res.status(200).json(users);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to load users' });
+      return res.status(200).json(users);
     }
-  } else if (req.method === 'POST') {
-    try {
+
+    if (req.method === 'POST') {
       const newUser: User = req.body;
       const users: User[] = JSON.parse(fs.readFileSync(usersFilePath, 'utf8'));
       
@@ -28,21 +26,20 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       
       users.push(newUser);
       fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
-      res.status(201).json({ message: 'User created successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to create user' });
+      return res.status(201).json({ message: 'User created successfully' });
     }
-  } else if (req.method === 'DELETE') {
-    try {
+
+    if (req.method === 'DELETE') {
       const { username } = req.query;
       const users: User[] = JSON.parse(fs.readFileSync(usersFilePath, 'utf8'));
       const filteredUsers = users.filter(user => user.username !== username);
       fs.writeFileSync(usersFilePath, JSON.stringify(filteredUsers, null, 2));
-      res.status(200).json({ message: 'User deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to delete user' });
+      return res.status(200).json({ message: 'User deleted successfully' });
     }
-  } else {
-    res.status(405).json({ message: 'Method not allowed' });
+
+    return res.status(405).json({ message: 'Method not allowed' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 }
