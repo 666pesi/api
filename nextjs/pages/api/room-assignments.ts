@@ -9,7 +9,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '{}';
       res.status(200).json(JSON.parse(data));
-    } catch {
+    } catch (err) {
+      console.error('Error loading room assignments:', err);
       res.status(500).json({ message: 'Failed to load room assignments' });
     }
   } else if (req.method === 'POST') {
@@ -22,7 +23,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       assignments[username] = rooms;
       fs.writeFileSync(filePath, JSON.stringify(assignments, null, 2));
       res.status(200).json({ message: 'Assignments updated successfully!' });
-    } catch {
+    } catch (err) {
+      console.error('Error updating assignments:', err);
       res.status(500).json({ message: 'Failed to update assignments' });
     }
   } else {
