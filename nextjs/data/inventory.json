@@ -10,23 +10,5 @@
     "name": "Table",
     "room": "B01",
     "checked": false
-  },
-  {
-    "code": "A003",
-    "name": "Lamp",
-    "room": "B02",
-    "checked": false
-  },
-  {
-    "code": "A004",
-    "name": "Sofa",
-    "room": "B03",
-    "checked": false
-  },
-  {
-    "code": "A005",
-    "name": "PC",
-    "room": "B02",
-    "checked": false
   }
 ]

@@ -12,55 +12,31 @@ export default function Rooms() {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchRooms = async () => {
-    try {
-      const response = await fetch('/api/rooms');
-      const data = await response.json();
-      setRooms(data);
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error loading rooms:', error);
-      setIsLoading(false);
-    }
+    const response = await fetch('/api/rooms');
+    setRooms(await response.json());
+    setIsLoading(false);
   };
 
-  useEffect(() => {
-    fetchRooms();
-  }, []);
+  useEffect(() => { fetchRooms(); }, []);
 
   const handleAddRoom = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const response = await fetch('/api/rooms', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newRoom),
-      });
-      
-      if (response.ok) {
-        setNewRoom({ code: '', name: '' });
-        await fetchRooms();
-      }
-    } catch (error) {
-      console.error('Error adding room:', error);
-    }
+    await fetch('/api/rooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRoom)
+    });
+    setNewRoom({ code: '', name: '' });
+    fetchRooms();
   };
 
   const handleDeleteRoom = async (code: string) => {
-    if (!confirm('Are you sure you want to delete this room?')) return;
-    
-    try {
-      const response = await fetch('/api/rooms', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
-      });
-      
-      if (response.ok) {
-        await fetchRooms();
-      }
-    } catch (error) {
-      console.error('Error deleting room:', error);
-    }
+    await fetch('/api/rooms', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    fetchRooms();
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -70,30 +46,24 @@ export default function Rooms() {
       <h1>Room Management</h1>
       <Link href="/">Back to Main Menu</Link>
       
-      <h2>Add New Room</h2>
       <form onSubmit={handleAddRoom}>
-        <div>
-          <label>Room Code:</label>
-          <input
-            type="text"
-            value={newRoom.code}
-            onChange={(e) => setNewRoom({ ...newRoom, code: e.target.value })}
-            required
-          />
-        </div>
-        <div>
-          <label>Room Name:</label>
-          <input
-            type="text"
-            value={newRoom.name}
-            onChange={(e) => setNewRoom({ ...newRoom, name: e.target.value })}
-            required
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Room Code"
+          value={newRoom.code}
+          onChange={(e) => setNewRoom({...newRoom, code: e.target.value})}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Room Name"
+          value={newRoom.name}
+          onChange={(e) => setNewRoom({...newRoom, name: e.target.value})}
+          required
+        />
         <button type="submit">Add Room</button>
       </form>
       
-      <h2>Existing Rooms</h2>
       <table>
         <thead>
           <tr>
@@ -103,7 +73,7 @@ export default function Rooms() {
           </tr>
         </thead>
         <tbody>
-          {rooms.map((room) => (
+          {rooms.map(room => (
             <tr key={room.code}>
               <td>{room.code}</td>
               <td>{room.name}</td>

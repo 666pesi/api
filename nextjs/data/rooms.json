@@ -1,1 +1,10 @@
-[]
+[
+    {
+      "code": "R101",
+      "name": "Main Office"
+    },
+    {
+      "code": "R202",
+      "name": "Conference Room"
+    }
+  ]

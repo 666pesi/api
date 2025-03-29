@@ -8,38 +8,26 @@ export default function InventoryCheck() {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async () => {
-    try {
-      const [assignmentsRes, usersRes, roomsRes] = await Promise.all([
-        fetch('/api/room-assignments'),
-        fetch('/api/users'),
-        fetch('/api/rooms')
-      ]);
-      
-      setAssignments(await assignmentsRes.json());
-      setUsers(await usersRes.json());
-      setRooms(await roomsRes.json());
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      setIsLoading(false);
-    }
+    const [assignmentsRes, usersRes, roomsRes] = await Promise.all([
+      fetch('/api/inventory-check'),
+      fetch('/api/users'),
+      fetch('/api/rooms')
+    ]);
+    setAssignments(await assignmentsRes.json());
+    setUsers(await usersRes.json());
+    setRooms(await roomsRes.json());
+    setIsLoading(false);
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleAssignmentChange = async (username: string, selectedRooms: string[]) => {
-    try {
-      await fetch('/api/room-assignments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, rooms: selectedRooms }),
-      });
-      await fetchData();
-    } catch (error) {
-      console.error('Error updating assignments:', error);
-    }
+    await fetch('/api/inventory-check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, rooms: selectedRooms })
+    });
+    fetchData();
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -49,7 +37,6 @@ export default function InventoryCheck() {
       <h1>Inventory Check Assignments</h1>
       <Link href="/">Back to Main Menu</Link>
       
-      <h2>User Room Assignments</h2>
       <table>
         <thead>
           <tr>
@@ -58,7 +45,7 @@ export default function InventoryCheck() {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {users.map(user => (
             <tr key={user.username}>
               <td>{user.username}</td>
               <td>
@@ -66,11 +53,13 @@ export default function InventoryCheck() {
                   multiple
                   value={assignments[user.username] || []}
                   onChange={(e) => {
-                    const options = Array.from(e.target.selectedOptions, option => option.value);
-                    handleAssignmentChange(user.username, options);
+                    const selected = Array.from(e.target.options)
+                      .filter(opt => opt.selected)
+                      .map(opt => opt.value);
+                    handleAssignmentChange(user.username, selected);
                   }}
                 >
-                  {rooms.map((room) => (
+                  {rooms.map(room => (
                     <option key={room.code} value={room.code}>
                       {room.name} ({room.code})
                     </option>

@@ -14,15 +14,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '[]';
       res.status(200).json(JSON.parse(data));
-    } catch (err) {
-      console.error('Error loading rooms:', err);
+    } catch (error) {
+      console.error('Error loading rooms:', error);
       res.status(500).json({ message: 'Failed to load rooms' });
     }
   } else if (req.method === 'POST') {
     try {
       const newRoom: Room = req.body;
-      const rooms: Room[] = fs.existsSync(filePath) 
-        ? JSON.parse(fs.readFileSync(filePath, 'utf8')) 
+      const rooms: Room[] = fs.existsSync(filePath)
+        ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
         : [];
       
       if (rooms.some(r => r.code === newRoom.code)) {
@@ -32,22 +32,19 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       rooms.push(newRoom);
       fs.writeFileSync(filePath, JSON.stringify(rooms, null, 2));
       res.status(200).json({ message: 'Room added successfully!' });
-    } catch (err) {
-      console.error('Error adding room:', err);
+    } catch (error) {
+      console.error('Error adding room:', error);
       res.status(500).json({ message: 'Failed to add room' });
     }
   } else if (req.method === 'DELETE') {
     try {
       const { code } = req.body;
-      const rooms: Room[] = fs.existsSync(filePath)
-        ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
-        : [];
-      
+      const rooms: Room[] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       const updatedRooms = rooms.filter(room => room.code !== code);
       fs.writeFileSync(filePath, JSON.stringify(updatedRooms, null, 2));
       res.status(200).json({ message: 'Room deleted successfully!' });
-    } catch (err) {
-      console.error('Error deleting room:', err);
+    } catch (error) {
+      console.error('Error deleting room:', error);
       res.status(500).json({ message: 'Failed to delete room' });
     }
   } else {
