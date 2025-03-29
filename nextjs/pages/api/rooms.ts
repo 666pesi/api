@@ -14,7 +14,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '[]';
       res.status(200).json(JSON.parse(data));
-    } catch (error) {
+    } catch (err) {
+      console.error('Error loading rooms:', err);
       res.status(500).json({ message: 'Failed to load rooms' });
     }
   } else if (req.method === 'POST') {
@@ -31,7 +32,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       rooms.push(newRoom);
       fs.writeFileSync(filePath, JSON.stringify(rooms, null, 2));
       res.status(200).json({ message: 'Room added successfully!' });
-    } catch (error) {
+    } catch (err) {
+      console.error('Error adding room:', err);
       res.status(500).json({ message: 'Failed to add room' });
     }
   } else if (req.method === 'DELETE') {
@@ -44,7 +46,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       const updatedRooms = rooms.filter(room => room.code !== code);
       fs.writeFileSync(filePath, JSON.stringify(updatedRooms, null, 2));
       res.status(200).json({ message: 'Room deleted successfully!' });
-    } catch (error) {
+    } catch (err) {
+      console.error('Error deleting room:', err);
       res.status(500).json({ message: 'Failed to delete room' });
     }
   } else {
