@@ -8,51 +8,38 @@ interface InventoryItem {
   checked: boolean;
 }
 
+interface Room {
+  code: string;
+  name: string;
+}
+
 export default function Inventory() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Function to fetch inventory data
-  const fetchInventoryData = async () => {
-    try {
-      const response = await fetch('/api/load');
-      if (!response.ok) {
-        throw new Error('Failed to load data');
-      }
-      const data: InventoryItem[] = await response.json();
-      setInventoryData(data);
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch data on component mount
   useEffect(() => {
-    fetchInventoryData();
+    const fetchData = async () => {
+      const [inventoryRes, roomsRes] = await Promise.all([
+        fetch('/api/load'),
+        fetch('/api/rooms')
+      ]);
+      setInventoryData(await inventoryRes.json());
+      setRooms(await roomsRes.json());
+      setIsLoading(false);
+    };
+    fetchData();
   }, []);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    try {
-      const response = await fetch('/api/export', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(inventoryData),
-      });
-
-      if (response.ok) {
-        alert('Data saved successfully!');
-      } else {
-        alert('Failed to save data.');
-      }
-    } catch (error) {
-      console.error('Error saving data:', error);
-      alert('Failed to save data.');
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const response = await fetch('/api/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(inventoryData),
+    });
+    if (response.ok) {
+      alert('Data saved successfully!');
     }
   };
 
@@ -77,37 +64,13 @@ export default function Inventory() {
     setInventoryData(updatedData);
   };
 
-  // Function to handle sync
-  const handleSync = async () => {
-    try {
-      const response = await fetch('/api/sync-now', {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        alert('Data synchronized successfully!');
-        // Refetch inventory data after sync
-        await fetchInventoryData(); // Ensure this is awaited
-      } else {
-        alert('Failed to synchronize data.');
-      }
-    } catch (error) {
-      console.error('Error synchronizing data:', error);
-      alert('Failed to synchronize data.');
-    }
-  };
-
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
+  if (isLoading) return <p>Loading...</p>;
 
   return (
     <main>
       <h1>Inventory Editor</h1>
       <Link href="/">Back to Main Menu</Link>
-      <button onClick={handleSync} style={{ marginBottom: '16px' }}>
-        Sync Now
-      </button>
+      
       <form onSubmit={handleSubmit}>
         <table>
           <thead>
@@ -137,11 +100,17 @@ export default function Inventory() {
                   />
                 </td>
                 <td>
-                  <input
-                    type="text"
+                  <select
                     value={item.room}
                     onChange={(e) => handleChange(index, 'room', e.target.value)}
-                  />
+                  >
+                    <option value="">Select Room</option>
+                    {rooms.map(room => (
+                      <option key={room.code} value={room.code}>
+                        {room.name} ({room.code})
+                      </option>
+                    ))}
+                  </select>
                 </td>
                 <td>
                   <input
@@ -150,22 +119,4 @@ export default function Inventory() {
                     onChange={(e) => handleChange(index, 'checked', e.target.checked)}
                   />
                 </td>
-                <td>
-                  <button type="button" onClick={() => removeItem(index)}>
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div style={{ marginTop: '16px' }}>
-          <button type="button" onClick={addNewItem} style={{ marginRight: '8px' }}>
-            Add New Item
-          </button>
-          <button type="submit">Save Changes</button>
-        </div>
-      </form>
-    </main>
-  );
-}
+                <td
