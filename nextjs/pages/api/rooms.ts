@@ -7,7 +7,7 @@ const inventoryFilePath = path.join(process.cwd(), 'data', 'inventory.json');
 
 interface Room {
   name: string;
-  assignedUsers: string[]; // array of usernames
+  assignedUser: string;
 }
 
 interface InventoryItem {
@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Merge unique rooms with existing assignments
       const rooms: Room[] = uniqueRooms.map(roomName => {
         const existingRoom = existingRooms.find(r => r.name === roomName);
-        return existingRoom || { name: roomName, assignedUsers: [] };
+        return existingRoom || { name: roomName, assignedUser: '' };
       });
 
       // Add any rooms that might be in rooms.json but not in inventory
