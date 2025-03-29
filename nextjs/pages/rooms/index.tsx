@@ -98,18 +98,18 @@ export default function Rooms() {
 
   return (
     <main className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Room Management</h1>
-      <Link href="/" className="text-blue-500 hover:underline mb-6 inline-block">
+      <h1 className="text-2xl mb-4">Room Management</h1>
+      <Link href="/" className="text-blue-400 hover:underline mb-6 inline-block">
         ← Back to Main Menu
       </Link>
       
-      <h2 className="text-xl font-semibold mb-4">Room Assignments</h2>
-      <table className="w-full border-collapse">
+      <h2 className="text-xl mb-4">Room Assignments</h2>
+      <table className="w-full">
         <thead>
-          <tr className="bg-gray-100">
-            <th className="p-3 text-left border-b">Room</th>
-            <th className="p-3 text-left border-b">Assigned User</th>
-            <th className="p-3 text-left border-b">Actions</th>
+          <tr className="border-b">
+            <th className="p-3 text-left">Room</th>
+            <th className="p-3 text-left">Assigned User</th>
+            <th className="p-3 text-left">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -118,17 +118,17 @@ export default function Rooms() {
               <td className="p-3">{room.name}</td>
               <td className="p-3 relative">
                 <div 
-                  className="px-3 py-2 border rounded cursor-pointer inline-block min-w-[150px] bg-gray-50 hover:bg-gray-100"
+                  className="px-3 py-2 border border-gray-600 rounded cursor-pointer inline-block min-w-[150px] bg-gray-800 hover:bg-gray-700"
                   onClick={() => toggleDropdown(room.name)}
                 >
                   {room.assignedUser || 'Select user'}
                   {dropdownOpen === room.name && (
-                    <div className="absolute top-full left-0 z-10 bg-white border rounded shadow-md w-full mt-1">
+                    <div className="absolute top-full left-0 z-10 bg-gray-800 border border-gray-600 rounded shadow-lg w-full mt-1">
                       {users.map((user) => (
                         <div 
                           key={user.username}
-                          className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
-                            room.assignedUser === user.username ? 'bg-blue-50' : ''
+                          className={`px-3 py-2 cursor-pointer hover:bg-gray-700 ${
+                            room.assignedUser === user.username ? 'bg-gray-600' : ''
                           }`}
                           onClick={() => handleUserAssignment(room.name, user.username)}
                         >
@@ -136,7 +136,7 @@ export default function Rooms() {
                         </div>
                       ))}
                       <div 
-                        className="px-3 py-2 cursor-pointer text-gray-500 border-t hover:bg-gray-100"
+                        className="px-3 py-2 cursor-pointer text-gray-400 border-t border-gray-600 hover:bg-gray-700"
                         onClick={() => handleUserAssignment(room.name, '')}
                       >
                         Clear assignment
@@ -148,7 +148,7 @@ export default function Rooms() {
               <td className="p-3">
                 <button 
                   onClick={() => handleDeleteRoom(room.name)}
-                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                 >
                   Delete
                 </button>
