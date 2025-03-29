@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function CreateRoom() {
   const [code, setCode] = useState('');
@@ -21,7 +22,7 @@ export default function CreateRoom() {
   return (
     <div>
       <h1>Create Room</h1>
-      <a href="/">Back</a>
+      <Link href="/">Back</Link>
       
       <form onSubmit={handleSubmit}>
         <div>

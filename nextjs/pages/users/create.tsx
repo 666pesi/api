@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function CreateUser() {
   const [username, setUsername] = useState('');
@@ -21,7 +22,7 @@ export default function CreateUser() {
   return (
     <div>
       <h1>Create User</h1>
-      <a href="/">Back</a>
+      <Link href="/">Back</Link>
       
       <form onSubmit={handleSubmit}>
         <div>
