@@ -26,28 +26,55 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         ? JSON.parse(fs.readFileSync(inventoryFilePath, 'utf8'))
         : [];
 
-      // Read and process exports
-      if (fs.existsSync(exportsFilePath)) {
-        const exports: ExportData[] = JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'));
-        
-        // Create a new array for the updated inventory
-        const updatedInventory = [...inventory];
+      // Read all exports
+      const allExports: ExportData[] = fs.existsSync(exportsFilePath)
+        ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
+        : [];
 
-        // Merge exports into inventory
-        exports.forEach((exp) => {
-          exp.data.forEach((item) => {
-            const existingIndex = updatedInventory.findIndex((i) => i.code === item.code);
-            if (existingIndex !== -1) {
-              updatedInventory[existingIndex] = { ...updatedInventory[existingIndex], ...item };
-            } else {
-              updatedInventory.push(item);
-            }
-          });
+      // Create a map to track checked items and their rooms
+      const checkedItemsMap = new Map<string, string>();
+
+      // First pass: Identify all checked items and their rooms
+      allExports.forEach(exp => {
+        exp.data.forEach(item => {
+          if (item.checked) {
+            checkedItemsMap.set(item.code, item.room);
+          }
         });
+      });
 
-        // Save updated inventory
-        fs.writeFileSync(inventoryFilePath, JSON.stringify(updatedInventory, null, 2));
-      }
+      // Create updated inventory
+      const updatedInventory = [...inventory];
+
+      // Process all exports
+      allExports.forEach(exp => {
+        exp.data.forEach(item => {
+          const existingIndex = updatedInventory.findIndex(i => i.code === item.code);
+          
+          // If item was checked in any export, use that room
+          const checkedRoom = checkedItemsMap.get(item.code);
+          const finalRoom = checkedRoom || item.room;
+
+          if (existingIndex !== -1) {
+            // Update existing item
+            updatedInventory[existingIndex] = {
+              ...updatedInventory[existingIndex],
+              ...item,
+              room: finalRoom, // Use room from checked item if available
+              checked: updatedInventory[existingIndex].checked || item.checked // Preserve checked status
+            };
+          } else {
+            // Add new item
+            updatedInventory.push({
+              ...item,
+              room: finalRoom // Use room from checked item if available
+            });
+          }
+        });
+      });
+
+      // Save updated inventory
+      fs.writeFileSync(inventoryFilePath, JSON.stringify(updatedInventory, null, 2));
 
       // Clear exports
       fs.writeFileSync(exportsFilePath, JSON.stringify([], null, 2));
