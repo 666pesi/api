@@ -4,7 +4,6 @@ import path from 'path';
 
 const exportsDir = path.join(process.cwd(), 'data');
 const pendingExportsFile = path.join(exportsDir, 'pending-exports.json');
-const inventoryFile = path.join(exportsDir, 'inventory.json');
 
 interface InventoryItem {
   code: string;
@@ -13,38 +12,37 @@ interface InventoryItem {
   checked: boolean;
 }
 
+interface ExportRecord {
+  id: string;
+  data: InventoryItem[];
+  receivedAt: string;
+  synced: boolean;
+}
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
   try {
-    // Create directory if needed
     if (!fs.existsSync(exportsDir)) {
       fs.mkdirSync(exportsDir, { recursive: true });
     }
 
-    // Get the export data from mobile app
     const exportData: InventoryItem[] = req.body;
-
-    // Create new export record
-    const newExport = {
+    const newExport: ExportRecord = {
       id: Date.now().toString(),
       data: exportData,
       receivedAt: new Date().toISOString(),
       synced: false
     };
 
-    // Read existing pending exports or initialize empty array
-    let pendingExports = [];
+    let pendingExports: ExportRecord[] = [];
     if (fs.existsSync(pendingExportsFile)) {
       pendingExports = JSON.parse(fs.readFileSync(pendingExportsFile, 'utf-8'));
     }
 
-    // Add new export
     pendingExports.push(newExport);
-
-    // Save updated pending exports
     fs.writeFileSync(pendingExportsFile, JSON.stringify(pendingExports, null, 2));
 
     res.status(200).json({ success: true });
