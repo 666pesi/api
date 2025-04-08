@@ -2,9 +2,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-const inventoryFilePath = path.join(process.cwd(), 'data', 'inventory.json');
-const exportsFilePath = path.join(process.cwd(), 'data', 'exports.json');
-
 interface InventoryItem {
   code: string;
   name: string;
@@ -18,47 +15,51 @@ interface ExportData {
   receivedAt: string;
 }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    try {
-      // Read existing inventory and exports
-      const inventory: InventoryItem[] = fs.existsSync(inventoryFilePath)
-        ? JSON.parse(fs.readFileSync(inventoryFilePath, 'utf8'))
-        : [];
-      const exports: ExportData[] = fs.existsSync(exportsFilePath)
-        ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
-        : [];
+const exportsDir = path.join(process.cwd(), 'data');
+const exportsFile = path.join(exportsDir, 'exports.json');
 
-      // Merge exports into inventory
-      exports.forEach((exp) => {
-        exp.data.forEach((item) => {
-          const existingItemIndex = inventory.findIndex((i) => i.code === item.code);
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
 
-          if (existingItemIndex !== -1) {
-            // If the item exists, update it
-            inventory[existingItemIndex] = {
-              ...inventory[existingItemIndex],
-              ...item, // Overwrite with the new data
-            };
-          } else {
-            // If the item doesn't exist, add it to the inventory
-            inventory.push(item);
-          }
-        });
-      });
+  try {
+    // In a real app, you would get this data from your sync source
+    // For now, we'll use dummy data
+    const newExportData: InventoryItem[] = [
+      { code: '001', name: 'Item 1', room: 'Room A', checked: true },
+      { code: '002', name: 'Item 2', room: 'Room B', checked: false },
+      // Add more items as needed
+    ];
 
-      // Save updated inventory
-      fs.writeFileSync(inventoryFilePath, JSON.stringify(inventory, null, 2));
-
-      // Clear exports
-      fs.writeFileSync(exportsFilePath, JSON.stringify([], null, 2));
-
-      res.status(200).json({ message: 'Data synchronized successfully!' });
-    } catch (error) {
-      console.error('Error synchronizing data:', error);
-      res.status(500).json({ message: 'Failed to synchronize data' });
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(exportsDir)) {
+      fs.mkdirSync(exportsDir, { recursive: true });
     }
-  } else {
-    res.status(405).json({ message: 'Method not allowed' });
+
+    // Read existing exports or initialize empty array
+    let existingExports: ExportData[] = [];
+    if (fs.existsSync(exportsFile)) {
+      const fileContent = fs.readFileSync(exportsFile, 'utf-8');
+      existingExports = JSON.parse(fileContent);
+    }
+
+    // Create new export record
+    const newExport: ExportData = {
+      id: Date.now().toString(), // Simple ID generation
+      data: newExportData,
+      receivedAt: new Date().toISOString(),
+    };
+
+    // Add new export to beginning of array (most recent first)
+    const updatedExports = [newExport, ...existingExports];
+
+    // Save updated exports
+    fs.writeFileSync(exportsFile, JSON.stringify(updatedExports, null, 2));
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Sync error:', error);
+    res.status(500).json({ message: 'Sync failed' });
   }
 }
