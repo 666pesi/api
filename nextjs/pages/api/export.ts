@@ -11,17 +11,42 @@ interface InventoryItem {
   checked: boolean;
 }
 
+interface ExportData {
+  id: string;
+  data: InventoryItem[];
+  receivedAt: string;
+}
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    try {
+  try {
+    if (req.method === 'GET') {
+      // Read existing exports
+      if (!fs.existsSync(inventoryFilePath)) {
+        return res.status(200).json([]);
+      }
+      
+      const fileContent = fs.readFileSync(inventoryFilePath, 'utf-8');
+      const data = JSON.parse(fileContent);
+      
+      // Format as ExportData array
+      const exportData: ExportData = {
+        id: '1', // You might want to generate a proper ID
+        data: data,
+        receivedAt: new Date().toISOString()
+      };
+      
+      res.status(200).json([exportData]);
+    } 
+    else if (req.method === 'POST') {
       const newData: InventoryItem[] = req.body;
       fs.writeFileSync(inventoryFilePath, JSON.stringify(newData, null, 2));
       res.status(200).json({ message: 'Data exported successfully!' });
-    } catch (error) {
-      console.error('Error exporting data:', error);
-      res.status(500).json({ message: 'Failed to export data' });
+    } 
+    else {
+      res.status(405).json({ message: 'Method not allowed' });
     }
-  } else {
-    res.status(405).json({ message: 'Method not allowed' });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
