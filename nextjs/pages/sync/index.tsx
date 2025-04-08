@@ -14,6 +14,31 @@ interface ExportData {
   receivedAt: string;
 }
 
+// Helper function for syntax highlighting
+const syntaxHighlight = (json: string) => {
+  if (!json) return '';
+  
+  json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return json.replace(
+    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+    (match) => {
+      let cls = 'number';
+      if (/^"/.test(match)) {
+        if (/:$/.test(match)) {
+          cls = 'key';
+        } else {
+          cls = 'string';
+        }
+      } else if (/true|false/.test(match)) {
+        cls = 'boolean';
+      } else if (/null/.test(match)) {
+        cls = 'null';
+      }
+      return `<span class="${cls}">${match}</span>`;
+    }
+  );
+};
+
 export default function Sync() {
   const [exports, setExports] = useState<ExportData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,7 +64,9 @@ export default function Sync() {
 
       if (response.ok) {
         alert('Data synchronized successfully!');
-        setExports([]); // Clear the list after sync
+        // Refresh the exports after sync
+        const updatedExports = await fetch('/api/exports').then(res => res.json());
+        setExports(updatedExports);
       } else {
         alert('Failed to synchronize data.');
       }
@@ -50,25 +77,48 @@ export default function Sync() {
   };
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <div className="loading">Loading...</div>;
   }
 
   return (
     <main>
       <h1>Sync Page</h1>
       <Link href="/">Back to Main Menu</Link>
-      <div>
+      
+      <div className="sync-container">
         <h2>Received Exports</h2>
-        <ul>
-          {exports.map((exp) => (
-            <li key={exp.id}>
-              <p>Received at: {exp.receivedAt}</p>
-              <pre>{JSON.stringify(exp.data, null, 2)}</pre>
-            </li>
-          ))}
-        </ul>
+        
+        {exports.length === 0 ? (
+          <p>No exports available</p>
+        ) : (
+          <div className="exports-list">
+            {exports.map((exp) => (
+              <div key={exp.id} className="export-item">
+                <p>Received at: {new Date(exp.receivedAt).toLocaleString()}</p>
+                <div className="export-data">
+                  <pre 
+                    dangerouslySetInnerHTML={{
+                      __html: syntaxHighlight(JSON.stringify(exp.data, null, 2))
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        <div className="export-actions">
+          <button onClick={handleSync}>Sync Now</button>
+          {exports.length > 0 && (
+            <button 
+              onClick={() => setExports([])}
+              className="clear-btn"
+            >
+              Clear List
+            </button>
+          )}
+        </div>
       </div>
-      <button onClick={handleSync}>Sync Now</button>
     </main>
   );
 }
