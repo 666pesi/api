@@ -11,17 +11,44 @@ interface InventoryItem {
   checked: boolean;
 }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const newData: InventoryItem[] = req.body;
-      fs.writeFileSync(inventoryFilePath, JSON.stringify(newData, null, 2));
-      res.status(200).json({ message: 'Data exported successfully!' });
+      const inventoryData: InventoryItem[] = req.body;
+
+      // Validate data
+      if (!Array.isArray(inventoryData)) {
+        return res.status(400).json({ message: 'Inventory data must be an array' });
+      }
+
+      // Save to inventory file
+      fs.writeFileSync(inventoryFilePath, JSON.stringify(inventoryData, null, 2));
+
+      // Also save as a new export
+      const exportResponse = await fetch('http://localhost:3000/api/exports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inventoryData)
+      });
+
+      if (!exportResponse.ok) {
+        throw new Error('Failed to create export record');
+      }
+
+      res.status(200).json({ 
+        message: 'Inventory saved and export created',
+        itemCount: inventoryData.length
+      });
+
     } catch (error) {
-      console.error('Error exporting data:', error);
-      res.status(500).json({ message: 'Failed to export data' });
+      console.error('Export error:', error);
+      res.status(500).json({ 
+        message: 'Export failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   } else {
+    res.setHeader('Allow', ['POST']);
     res.status(405).json({ message: 'Method not allowed' });
   }
 }

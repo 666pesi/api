@@ -18,47 +18,64 @@ interface ExportData {
   receivedAt: string;
 }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    try {
-      // Read existing inventory and exports
-      const inventory: InventoryItem[] = fs.existsSync(inventoryFilePath)
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+
+  try {
+    // 1. Load current data
+    const [currentInventory, pendingExports] = await Promise.all([
+      fs.existsSync(inventoryFilePath)
         ? JSON.parse(fs.readFileSync(inventoryFilePath, 'utf8'))
-        : [];
-      const exports: ExportData[] = fs.existsSync(exportsFilePath)
+        : [],
+      fs.existsSync(exportsFilePath)
         ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
-        : [];
+        : []
+    ]);
 
-      // Merge exports into inventory
-      exports.forEach((exp) => {
-        exp.data.forEach((item) => {
-          const existingItemIndex = inventory.findIndex((i) => i.code === item.code);
-
-          if (existingItemIndex !== -1) {
-            // If the item exists, update it
-            inventory[existingItemIndex] = {
-              ...inventory[existingItemIndex],
-              ...item, // Overwrite with the new data
-            };
-          } else {
-            // If the item doesn't exist, add it to the inventory
-            inventory.push(item);
-          }
-        });
+    if (pendingExports.length === 0) {
+      return res.status(200).json({ 
+        message: 'No exports to sync', 
+        inventory: currentInventory 
       });
-
-      // Save updated inventory
-      fs.writeFileSync(inventoryFilePath, JSON.stringify(inventory, null, 2));
-
-      // Clear exports
-      fs.writeFileSync(exportsFilePath, JSON.stringify([], null, 2));
-
-      res.status(200).json({ message: 'Data synchronized successfully!' });
-    } catch (error) {
-      console.error('Error synchronizing data:', error);
-      res.status(500).json({ message: 'Failed to synchronize data' });
     }
-  } else {
-    res.status(405).json({ message: 'Method not allowed' });
+
+    // 2. Process all pending exports
+    const updatedInventory = [...currentInventory];
+    
+    pendingExports.forEach((exportData: ExportData) => {
+      exportData.data.forEach((item) => {
+        const existingIndex = updatedInventory.findIndex(i => i.code === item.code);
+        
+        if (existingIndex >= 0) {
+          // Update existing item
+          updatedInventory[existingIndex] = { 
+            ...updatedInventory[existingIndex], 
+            ...item 
+          };
+        } else {
+          // Add new item
+          updatedInventory.push(item);
+        }
+      });
+    });
+
+    // 3. Save changes
+    fs.writeFileSync(inventoryFilePath, JSON.stringify(updatedInventory, null, 2));
+    fs.writeFileSync(exportsFilePath, JSON.stringify([], null, 2)); // Clear exports
+
+    res.status(200).json({ 
+      message: `Synced ${pendingExports.length} export(s) successfully`,
+      updatedItems: updatedInventory.length - currentInventory.length,
+      totalItems: updatedInventory.length
+    });
+
+  } catch (error) {
+    console.error('Sync error:', error);
+    res.status(500).json({ 
+      message: 'Sync failed',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 }
