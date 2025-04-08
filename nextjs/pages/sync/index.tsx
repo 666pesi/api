@@ -39,7 +39,7 @@ export default function Sync() {
 
       if (response.ok) {
         alert('Data synchronized successfully!');
-        setExports([]); // Clear the list after sync
+        setExports([]); // Vymazanie zoznamu po synchronizácii
       } else {
         alert('Failed to synchronize data.');
       }

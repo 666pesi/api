@@ -22,22 +22,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       const newData: InventoryItem[] = req.body;
       
-      // Create export record
+      // Vytvorenie záznamu o exporte
       const exportRecord: ExportData = {
         id: Date.now().toString(),
         data: newData,
         receivedAt: new Date().toISOString(),
       };
 
-      // Read existing exports
+      // Čítanie existujúcich vývozov
       const existingExports: ExportData[] = fs.existsSync(exportsFilePath)
         ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
         : [];
 
-      // Add new export record
+      // Pridanie nového záznamu o exporte
       existingExports.push(exportRecord);
 
-      // Save to exports.json
+      // Uložiť do súboru exports.json
       fs.writeFileSync(exportsFilePath, JSON.stringify(existingExports, null, 2));
       
       res.status(200).json({ message: 'Export received successfully!' });

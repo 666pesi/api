@@ -84,7 +84,7 @@ export default function InventoryCheck() {
       });
       
       if (response.ok) {
-        // Refresh the assignments
+        // Obnovenie priradení
         const checkRes = await fetch('/api/inventory-check');
         setInventoryCheck(await checkRes.json());
       }
