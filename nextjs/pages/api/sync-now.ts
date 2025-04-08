@@ -2,9 +2,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-const exportsDir = path.join(process.cwd(), 'data');
-const pendingExportsFile = path.join(exportsDir, 'pending-exports.json');
-const inventoryFile = path.join(exportsDir, 'inventory.json');
+const inventoryFilePath = path.join(process.cwd(), 'data', 'inventory.json');
+const exportsFilePath = path.join(process.cwd(), 'data', 'exports.json');
 
 interface InventoryItem {
   code: string;
@@ -13,49 +12,53 @@ interface InventoryItem {
   checked: boolean;
 }
 
-interface ExportRecord {
+interface ExportData {
   id: string;
   data: InventoryItem[];
   receivedAt: string;
-  synced: boolean;
 }
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
+  if (req.method === 'POST') {
+    try {
+      // Read existing inventory and exports
+      const inventory: InventoryItem[] = fs.existsSync(inventoryFilePath)
+        ? JSON.parse(fs.readFileSync(inventoryFilePath, 'utf8'))
+        : [];
+      const exports: ExportData[] = fs.existsSync(exportsFilePath)
+        ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
+        : [];
 
-  try {
-    if (!fs.existsSync(pendingExportsFile)) {
-      return res.status(200).json({ message: 'No pending exports to sync' });
+      // Merge exports into inventory
+      exports.forEach((exp) => {
+        exp.data.forEach((item) => {
+          const existingItemIndex = inventory.findIndex((i) => i.code === item.code);
+
+          if (existingItemIndex !== -1) {
+            // If the item exists, update it
+            inventory[existingItemIndex] = {
+              ...inventory[existingItemIndex],
+              ...item, // Overwrite with the new data
+            };
+          } else {
+            // If the item doesn't exist, add it to the inventory
+            inventory.push(item);
+          }
+        });
+      });
+
+      // Save updated inventory
+      fs.writeFileSync(inventoryFilePath, JSON.stringify(inventory, null, 2));
+
+      // Clear exports
+      fs.writeFileSync(exportsFilePath, JSON.stringify([], null, 2));
+
+      res.status(200).json({ message: 'Data synchronized successfully!' });
+    } catch (error) {
+      console.error('Error synchronizing data:', error);
+      res.status(500).json({ message: 'Failed to synchronize data' });
     }
-
-    const pendingExports: ExportRecord[] = JSON.parse(fs.readFileSync(pendingExportsFile, 'utf-8'));
-    const exportsToSync = pendingExports.filter(exp => !exp.synced);
-    
-    if (exportsToSync.length === 0) {
-      return res.status(200).json({ message: 'No new exports to sync' });
-    }
-
-    let inventory: InventoryItem[] = [];
-    if (fs.existsSync(inventoryFile)) {
-      inventory = JSON.parse(fs.readFileSync(inventoryFile, 'utf-8'));
-    }
-
-    exportsToSync.forEach(exportData => {
-      inventory = [...inventory, ...exportData.data];
-      exportData.synced = true;
-    });
-
-    fs.writeFileSync(inventoryFile, JSON.stringify(inventory, null, 2));
-    fs.writeFileSync(pendingExportsFile, JSON.stringify(pendingExports, null, 2));
-
-    res.status(200).json({ 
-      success: true,
-      syncedCount: exportsToSync.length 
-    });
-  } catch (error) {
-    console.error('Sync error:', error);
-    res.status(500).json({ message: 'Sync failed' });
+  } else {
+    res.status(405).json({ message: 'Method not allowed' });
   }
 }
