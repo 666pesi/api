@@ -21,29 +21,27 @@ interface ExportData {
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      // Read existing inventory and exports
-      const inventory: InventoryItem[] = fs.existsSync(inventoryFilePath)
+      // Read existing inventory
+      let inventory: InventoryItem[] = fs.existsSync(inventoryFilePath)
         ? JSON.parse(fs.readFileSync(inventoryFilePath, 'utf8'))
         : [];
-      const exports: ExportData[] = fs.existsSync(exportsFilePath)
-        ? JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'))
-        : [];
 
-      // Merge exports into inventory
-      exports.forEach((exp) => {
-        exp.data.forEach((item) => {
-          const existingItemIndex = inventory.findIndex((i) => i.code === item.code);
-
-          if (existingItemIndex !== -1) {
-            inventory[existingItemIndex] = {
-              ...inventory[existingItemIndex],
-              ...item,
-            };
-          } else {
-            inventory.push(item);
-          }
+      // Read and process exports
+      if (fs.existsSync(exportsFilePath)) {
+        const exports: ExportData[] = JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'));
+        
+        // Merge exports into inventory
+        exports.forEach((exp) => {
+          exp.data.forEach((item) => {
+            const existingIndex = inventory.findIndex((i) => i.code === item.code);
+            if (existingIndex !== -1) {
+              inventory[existingIndex] = { ...inventory[existingIndex], ...item };
+            } else {
+              inventory.push(item);
+            }
+          });
         });
-      });
+      }
 
       // Save updated inventory
       fs.writeFileSync(inventoryFilePath, JSON.stringify(inventory, null, 2));

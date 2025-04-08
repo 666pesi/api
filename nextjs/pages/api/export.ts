@@ -3,7 +3,6 @@ import fs from 'fs';
 import path from 'path';
 
 const exportsFilePath = path.join(process.cwd(), 'data', 'exports.json');
-const inventoryFilePath = path.join(process.cwd(), 'data', 'inventory.json');
 
 interface InventoryItem {
   code: string;
