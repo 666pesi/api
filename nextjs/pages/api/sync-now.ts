@@ -22,7 +22,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
       // Read existing inventory
-      let inventory: InventoryItem[] = fs.existsSync(inventoryFilePath)
+      const inventory: InventoryItem[] = fs.existsSync(inventoryFilePath)
         ? JSON.parse(fs.readFileSync(inventoryFilePath, 'utf8'))
         : [];
 
@@ -30,21 +30,24 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       if (fs.existsSync(exportsFilePath)) {
         const exports: ExportData[] = JSON.parse(fs.readFileSync(exportsFilePath, 'utf8'));
         
+        // Create a new array for the updated inventory
+        const updatedInventory = [...inventory];
+
         // Merge exports into inventory
         exports.forEach((exp) => {
           exp.data.forEach((item) => {
-            const existingIndex = inventory.findIndex((i) => i.code === item.code);
+            const existingIndex = updatedInventory.findIndex((i) => i.code === item.code);
             if (existingIndex !== -1) {
-              inventory[existingIndex] = { ...inventory[existingIndex], ...item };
+              updatedInventory[existingIndex] = { ...updatedInventory[existingIndex], ...item };
             } else {
-              inventory.push(item);
+              updatedInventory.push(item);
             }
           });
         });
-      }
 
-      // Save updated inventory
-      fs.writeFileSync(inventoryFilePath, JSON.stringify(inventory, null, 2));
+        // Save updated inventory
+        fs.writeFileSync(inventoryFilePath, JSON.stringify(updatedInventory, null, 2));
+      }
 
       // Clear exports
       fs.writeFileSync(exportsFilePath, JSON.stringify([], null, 2));
