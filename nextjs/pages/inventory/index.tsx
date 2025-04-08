@@ -78,18 +78,18 @@ export default function Inventory() {
 
   return (
     <main>
-      <h1>Inventory Editor</h1>
-      <Link href="/">Back to Main Menu</Link>
+      <h1>Majetok</h1>
+      <Link href="/">Späť na hlavné menu</Link>
       
       <form onSubmit={handleSubmit}>
         <table>
           <thead>
             <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Room</th>
+              <th>Kód</th>
+              <th>Názov</th>
+              <th>Miestnosť</th>
               <th>Checked</th>
-              <th>Actions</th>
+              <th>Akcie</th>
             </tr>
           </thead>
           <tbody>
@@ -114,7 +114,7 @@ export default function Inventory() {
                     value={item.room}
                     onChange={(e) => handleChange(index, 'room', e.target.value)}
                   >
-                    <option value="">Select Room</option>
+                    <option value="">Vyber miesnosť</option>
                     {rooms.map(room => (
                       <option key={room.code} value={room.code}>
                         {room.name} ({room.code})
@@ -131,7 +131,7 @@ export default function Inventory() {
                 </td>
                 <td>
                   <button type="button" onClick={() => removeItem(index)}>
-                    Remove
+                  Odstrániť
                   </button>
                 </td>
               </tr>
@@ -140,9 +140,9 @@ export default function Inventory() {
         </table>
         <div>
           <button type="button" onClick={addNewItem}>
-            Add New Item
+          Pridať novú položku
           </button>
-          <button type="submit">Save Changes</button>
+          <button type="submit">Uložiť zmeny</button>
         </div>
       </form>
     </main>

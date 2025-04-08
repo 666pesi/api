@@ -51,13 +51,13 @@ export default function CreateUser() {
 
   return (
     <div>
-      <h1>Users Management</h1>
-      <Link href="/">Back to Main</Link>
+      <h1>Správa používateľov</h1>
+      <Link href="/">Späť na hlavnú stránku</Link>
 
-      <h2>Create New User</h2>
+      <h2>Vytvoriť nového používateľa</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Username: </label>
+          <label>Používateľské meno: </label>
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -65,7 +65,7 @@ export default function CreateUser() {
           />
         </div>
         <div>
-          <label>Password: </label>
+          <label>Heslo: </label>
           <input
             type="password"
             value={password}
@@ -73,15 +73,15 @@ export default function CreateUser() {
             required
           />
         </div>
-        <button type="submit">Create User</button>
+        <button type="submit">Vytvoriť</button>
       </form>
 
-      <h2>Existing Users</h2>
+      <h2>Existujúci používatelia</h2>
       <ul>
         {users.map(user => (
           <li key={user.username}>
             {user.username}
-            <button onClick={() => handleDelete(user.username)}>Delete</button>
+            <button onClick={() => handleDelete(user.username)}>Vymazať</button>
           </li>
         ))}
       </ul>

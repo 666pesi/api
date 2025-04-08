@@ -55,20 +55,20 @@ export default function Sync() {
 
   return (
     <main>
-      <h1>Sync Page</h1>
-      <Link href="/">Back to Main Menu</Link>
+      <h1>Stránka Synchronizácia</h1>
+      <Link href="/">Späť na hlavné menu</Link>
       <div>
-        <h2>Received Exports</h2>
+        <h2>Prijaté exporty</h2>
         <ul>
           {exports.map((exp) => (
             <li key={exp.id}>
-              <p>Received at: {exp.receivedAt}</p>
+              <p>Prijaté: {exp.receivedAt}</p>
               <pre>{JSON.stringify(exp.data, null, 2)}</pre>
             </li>
           ))}
         </ul>
       </div>
-      <button onClick={handleSync}>Sync Now</button>
+      <button onClick={handleSync}>Synchronizovať</button>
     </main>
   );
 }

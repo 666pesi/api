@@ -99,18 +99,18 @@ export default function InventoryCheck() {
 
   return (
     <main>
-      <h1>Inventory Check Assignments</h1>
-      <Link href="/">Back to Main Menu</Link>
+      <h1>Priradenie úloh</h1>
+      <Link href="/">Späť na hlavné menu</Link>
       
       <div style={{ margin: '20px 0' }}>
-        <h2>Assign Room to User</h2>
+        <h2>Priradiť miestnosť používateľovi</h2>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
           <select 
             value={selectedUser} 
             onChange={(e) => setSelectedUser(e.target.value)}
             style={{ padding: '8px' }}
           >
-            <option value="">Select User</option>
+            <option value="">Vyberte používateľa</option>
             {users.map(user => (
               <option key={user.username} value={user.username}>
                 {user.username}
@@ -123,7 +123,7 @@ export default function InventoryCheck() {
             onChange={(e) => setSelectedRoom(e.target.value)}
             style={{ padding: '8px' }}
           >
-            <option value="">Select Room</option>
+            <option value="">Vyberte miestnosť</option>
             {rooms.map(room => (
               <option key={room.code} value={room.code}>
                 {room.name} ({room.code})
@@ -135,19 +135,19 @@ export default function InventoryCheck() {
             onClick={handleAssign}
             disabled={!selectedUser || !selectedRoom}
           >
-            Assign
+            Priradiť
           </button>
         </div>
       </div>
       
       <div>
-        <h2>Current Assignments</h2>
+        <h2>Aktuálne priradenia</h2>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ backgroundColor: '#f2f2f2' }}>
-              <th style={{ padding: '10px', border: '1px solid #ddd' }}>User</th>
-              <th style={{ padding: '10px', border: '1px solid #ddd' }}>Assigned Rooms</th>
-              <th style={{ padding: '10px', border: '1px solid #ddd' }}>Actions</th>
+              <th style={{ padding: '10px', border: '1px solid #ddd' }}>Používateľ</th>
+              <th style={{ padding: '10px', border: '1px solid #ddd' }}>Pridelené miestnosti</th>
+              <th style={{ padding: '10px', border: '1px solid #ddd' }}>Akcie</th>
             </tr>
           </thead>
           <tbody>
@@ -164,7 +164,7 @@ export default function InventoryCheck() {
                           onClick={() => handleRemoveAssignment(username, roomCode)}
                           style={{ marginLeft: '10px', padding: '2px 5px' }}
                         >
-                          Remove
+                          Odstrániť
                         </button>
                       </div>
                     );
@@ -180,7 +180,7 @@ export default function InventoryCheck() {
                       }
                     }}
                   >
-                    Remove All
+                    Odstrániť všetky
                   </button>
                 </td>
               </tr>

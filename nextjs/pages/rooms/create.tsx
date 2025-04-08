@@ -51,13 +51,13 @@ export default function CreateRoom() {
 
   return (
     <div>
-      <h1>Rooms Management</h1>
-      <Link href="/">Back to Main</Link>
+      <h1>Miestnosti</h1>
+      <Link href="/">Späť na hlavnú stránku</Link>
 
-      <h2>Create New Room</h2>
+      <h2>Vytvoriť novú miestnosť</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Room Code: </label>
+          <label>Kód miestnosti: </label>
           <input
             value={code}
             onChange={(e) => setCode(e.target.value)}
@@ -65,22 +65,22 @@ export default function CreateRoom() {
           />
         </div>
         <div>
-          <label>Room Name: </label>
+          <label>Názov miestnosti: </label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
           />
         </div>
-        <button type="submit">Create Room</button>
+        <button type="submit">Vytvoriť miestnosť</button>
       </form>
 
-      <h2>Existing Rooms</h2>
+      <h2>Existujúce miestnosti</h2>
       <ul>
         {rooms.map(room => (
           <li key={room.code}>
             {room.name} ({room.code})
-            <button onClick={() => handleDelete(room.code)}>Delete</button>
+            <button onClick={() => handleDelete(room.code)}>Odstrániť</button>
           </li>
         ))}
       </ul>
