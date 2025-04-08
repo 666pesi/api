@@ -94,7 +94,7 @@ export default function Inventory() {
           </thead>
           <tbody>
             {inventoryData.map((item, index) => (
-              <tr key={item.code}>
+              <tr key={index}> {/* Fixed: Using index instead of item.code */}
                 <td>
                   <input
                     type="text"
