@@ -2,8 +2,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-const inventoryFilePath = path.join(process.cwd(), 'data', 'inventory.json');
 const exportsFilePath = path.join(process.cwd(), 'data', 'exports.json');
+const inventoryFilePath = path.join(process.cwd(), 'data', 'inventory.json');
 
 interface InventoryItem {
   code: string;
@@ -41,13 +41,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       // Save to exports.json
       fs.writeFileSync(exportsFilePath, JSON.stringify(existingExports, null, 2));
       
-      // Also save to inventory.json (keeping your existing functionality)
-      fs.writeFileSync(inventoryFilePath, JSON.stringify(newData, null, 2));
-      
-      res.status(200).json({ message: 'Data exported successfully!' });
+      res.status(200).json({ message: 'Export received successfully!' });
     } catch (error) {
-      console.error('Error exporting data:', error);
-      res.status(500).json({ message: 'Failed to export data' });
+      console.error('Error processing export:', error);
+      res.status(500).json({ message: 'Failed to process export' });
     }
   } else {
     res.status(405).json({ message: 'Method not allowed' });

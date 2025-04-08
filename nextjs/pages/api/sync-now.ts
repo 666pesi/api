@@ -35,13 +35,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           const existingItemIndex = inventory.findIndex((i) => i.code === item.code);
 
           if (existingItemIndex !== -1) {
-            // If the item exists, update it
             inventory[existingItemIndex] = {
               ...inventory[existingItemIndex],
-              ...item, // Overwrite with the new data
+              ...item,
             };
           } else {
-            // If the item doesn't exist, add it to the inventory
             inventory.push(item);
           }
         });

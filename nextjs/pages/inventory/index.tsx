@@ -39,7 +39,7 @@ export default function Inventory() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/export', {
+      const response = await fetch('/api/save-inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(inventoryData),
@@ -94,7 +94,7 @@ export default function Inventory() {
           </thead>
           <tbody>
             {inventoryData.map((item, index) => (
-              <tr key={index}> {/* Fixed: Using index instead of item.code */}
+              <tr key={index}>
                 <td>
                   <input
                     type="text"
