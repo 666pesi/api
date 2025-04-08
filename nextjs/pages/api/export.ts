@@ -2,7 +2,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-const inventoryFilePath = path.join(process.cwd(), 'data', 'inventory.json');
+const exportsDir = path.join(process.cwd(), 'data');
+const pendingExportsFile = path.join(exportsDir, 'pending-exports.json');
 
 interface InventoryItem {
   code: string;
@@ -11,44 +12,42 @@ interface InventoryItem {
   checked: boolean;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    try {
-      const inventoryData: InventoryItem[] = req.body;
+interface ExportRecord {
+  id: string;
+  data: InventoryItem[];
+  receivedAt: string;
+  synced: boolean;
+}
 
-      // Validate data
-      if (!Array.isArray(inventoryData)) {
-        return res.status(400).json({ message: 'Inventory data must be an array' });
-      }
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
 
-      // Save to inventory file
-      fs.writeFileSync(inventoryFilePath, JSON.stringify(inventoryData, null, 2));
-
-      // Also save as a new export
-      const exportResponse = await fetch('http://localhost:3000/api/exports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(inventoryData)
-      });
-
-      if (!exportResponse.ok) {
-        throw new Error('Failed to create export record');
-      }
-
-      res.status(200).json({ 
-        message: 'Inventory saved and export created',
-        itemCount: inventoryData.length
-      });
-
-    } catch (error) {
-      console.error('Export error:', error);
-      res.status(500).json({ 
-        message: 'Export failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+  try {
+    if (!fs.existsSync(exportsDir)) {
+      fs.mkdirSync(exportsDir, { recursive: true });
     }
-  } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).json({ message: 'Method not allowed' });
+
+    const exportData: InventoryItem[] = req.body;
+    const newExport: ExportRecord = {
+      id: Date.now().toString(),
+      data: exportData,
+      receivedAt: new Date().toISOString(),
+      synced: false
+    };
+
+    let pendingExports: ExportRecord[] = [];
+    if (fs.existsSync(pendingExportsFile)) {
+      pendingExports = JSON.parse(fs.readFileSync(pendingExportsFile, 'utf-8'));
+    }
+
+    pendingExports.push(newExport);
+    fs.writeFileSync(pendingExportsFile, JSON.stringify(pendingExports, null, 2));
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error saving export:', error);
+    res.status(500).json({ message: 'Failed to save export' });
   }
 }
