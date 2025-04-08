@@ -18,28 +18,31 @@ export default function Sync() {
   const [exports, setExports] = useState<ExportData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const loadExports = async () => {
+    try {
+      const response = await fetch('/api/exports');
+      const data = await response.json();
+      setExports(data);
+    } catch (error) {
+      console.error('Error loading exports:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetch('/api/exports')
-      .then((response) => response.json())
-      .then((data: ExportData[]) => {
-        setExports(data);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error loading exports:', error);
-        setIsLoading(false);
-      });
+    loadExports();
   }, []);
 
   const handleSync = async () => {
     try {
-      const response = await fetch('/api/sync-now', {
-        method: 'POST',
-      });
-
+      setIsLoading(true);
+      const response = await fetch('/api/sync-now', { method: 'POST' });
+      
       if (response.ok) {
         alert('Data synchronized successfully!');
-        setExports([]); // Clear the list after sync
+        // Reload the exports after sync
+        await loadExports();
       } else {
         alert('Failed to synchronize data.');
       }
@@ -49,26 +52,50 @@ export default function Sync() {
     }
   };
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
+  if (isLoading) return <p>Loading...</p>;
 
   return (
     <main>
       <h1>Sync Page</h1>
       <Link href="/">Back to Main Menu</Link>
+      
       <div>
         <h2>Received Exports</h2>
-        <ul>
-          {exports.map((exp) => (
-            <li key={exp.id}>
-              <p>Received at: {exp.receivedAt}</p>
-              <pre>{JSON.stringify(exp.data, null, 2)}</pre>
-            </li>
-          ))}
-        </ul>
+        {exports.length === 0 ? (
+          <p>No exports received yet</p>
+        ) : (
+          <div>
+            {exports.map((exp) => (
+              <div key={exp.id} style={{ marginBottom: '20px', padding: '10px', border: '1px solid #ddd' }}>
+                <p><strong>Received at:</strong> {new Date(exp.receivedAt).toLocaleString()}</p>
+                <pre style={{ 
+                  background: '#f5f5f5', 
+                  padding: '10px', 
+                  overflowX: 'auto',
+                  maxHeight: '300px'
+                }}>
+                  {JSON.stringify(exp.data, null, 2)}
+                </pre>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-      <button onClick={handleSync}>Sync Now</button>
+      
+      <button 
+        onClick={handleSync}
+        style={{
+          marginTop: '20px',
+          padding: '10px 15px',
+          background: '#4CAF50',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}
+      >
+        Sync Now
+      </button>
     </main>
   );
 }
