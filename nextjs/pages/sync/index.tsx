@@ -94,7 +94,7 @@ export default function Sync() {
           cursor: 'pointer'
         }}
       >
-        Sync Now
+        Sync Noww
       </button>
     </main>
   );
